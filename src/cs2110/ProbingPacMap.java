@@ -5,18 +5,21 @@ import java.util.NoSuchElementException;
 
 /**
  * A map with keys of type 'K' and values of type `V`, implemented using a hash table with linear
- * probing. 
+ * probing.
  */
 public class ProbingPacMap<K, V> implements PacMap<K, V> {
+
     /**
      * Represents an association of a key `key` (of type `K`) with a value `value` (of type `V`).
      */
-    private record Entry<K, V>(K key, V value) { }
+    private record Entry<K, V>(K key, V value) {
+
+    }
 
     /**
-     * Represents a tombstone. If an entry at index `i` is removed, element `i` will be replaced
-     * by a reference to this object. Tombstones count toward the load factor, and are cleared when
-     * the hash table is resized.
+     * Represents a tombstone. If an entry at index `i` is removed, element `i` will be replaced by
+     * a reference to this object. Tombstones count toward the load factor, and are cleared when the
+     * hash table is resized.
      */
     @SuppressWarnings("rawtypes")
     private static final Entry TOMBSTONE = new Entry<>(null, null);
@@ -42,16 +45,17 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      */
     private Entry<K, V>[] entries;
 
-    private void assertInv(){
-        assert 0 <  MAX_LOAD_FACTOR;
+    private void assertInv() {
+        assert 0 < MAX_LOAD_FACTOR;
         assert MAX_LOAD_FACTOR < 1;
         assert loadFactor() <= MAX_LOAD_FACTOR;
         assert size() >= 0;
     }
+
     /**
      * Stores current number of keys currently associated with values in this map. In other words,
-     * stores the current number of elements in the map.
-     * Requires that size >= 0. Requires size/entries.length <= MAX_LOAD_FACTOR.
+     * stores the current number of elements in the map. Requires that size >= 0. Requires
+     * size/entries.length <= MAX_LOAD_FACTOR.
      */
     private int size;
 
@@ -76,9 +80,12 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      * Returns the current load factor of the hash table backing this map. Runs in O(1) time.
      */
     private double loadFactor() {
-        return (double) size/ entries.length;
+        return (double) size / entries.length;
     }
 
+    private int hashValue(K key) {
+        return key.hashCode() % entries.length;
+    }
 
     /**
      * If `key` is a key in this map, return the index in `entries` for this key. Otherwise, returns
@@ -86,34 +93,58 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      * corresponding to the key's hash code (wrapping around).
      */
     private int findEntry(K key) {
-        // TODO 3c: Implement this method as specified.
-        throw new UnsupportedOperationException();
+        int index = hashValue(key);
+        for (int i = 0; i < entries.length; i++) {
+            if (entries[index].key.equals(key)){
+                assertInv();
+                return index;
+            }
+            index = (index + i + 1) % entries.length;
+        }
+        for (int i = 0; i < entries.length; i++){
+            if (entries[index] == null || entries[index].equals(TOMBSTONE)) {
+                assertInv();
+                return index;
+            }
+            index = (index + i + 1) % entries.length;
+        }
+        return index;
     }
 
     @Override
     public boolean containsKey(K key) {
-        // TODO 3d: Implement this method according to its specifications.
-        throw new UnsupportedOperationException();
+        assertInv();
+        return entries[findEntry(key)].equals(key);
     }
 
     @Override
     public V get(K key) {
-        // TODO 3e: Implement this method according to its specifications.
-        throw new UnsupportedOperationException();
+        assert containsKey(key);
+        assertInv();
+        return (entries[findEntry(key)].value);
     }
 
     @Override
     public void put(K key, V value) {
-        // TODO 3f: Implement this method according to its specifications.
-        throw new UnsupportedOperationException();
+        if (containsKey(key)) {
+            entries[findEntry(key)] = new Entry(key, value);
+        }
+        else{
+            int index=hashValue(key);
+            while (entries[index] != null){
+                index = (index +1) % entries.length;
+            }
+            entries[index] = new Entry(key, value);
+        }
     }
-
 
     @Override
     @SuppressWarnings("unchecked")
     public V remove(K key) {
-        // TODO 3g: Implement this method according to its specifications.
-        throw new UnsupportedOperationException();
+        assert containsKey(key);
+        V value=entries[findEntry(key)].value();
+        entries[findEntry(key)] = TOMBSTONE;
+        return value;
     }
 
     @Override
@@ -122,8 +153,8 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     }
 
     /**
-     * An iterator over the keys in this hash table. This map must not be structurally
-     * modified while any such iterators are alive.
+     * An iterator over the keys in this hash table. This map must not be structurally modified
+     * while any such iterators are alive.
      */
     private class ProbingPacMapIterator implements Iterator<K> {
 
@@ -143,12 +174,13 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
 
         /**
          * Set `iNext` to the first index `i` not less than the current value of `iNext` such that
-         * `entries[i] != null` and 'entries[i] != TOMBSTONE', or set it to `entries.length` if 
-         * there are no remaining non-null and non-tombstone entries.  Note that if `iNext` is 
+         * `entries[i] != null` and 'entries[i] != TOMBSTONE', or set it to `entries.length` if
+         * there are no remaining non-null and non-tombstone entries.  Note that if `iNext` is
          * already the index of a non-null and non-tombstone entry, then it will not be changed.
          */
         private void findNext() {
-            while (iNext < entries.length && (entries[iNext] == null || entries[iNext] == TOMBSTONE)) {
+            while (iNext < entries.length && (entries[iNext] == null
+                    || entries[iNext] == TOMBSTONE)) {
                 iNext += 1;
             }
         }
