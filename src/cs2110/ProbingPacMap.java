@@ -61,6 +61,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     @SuppressWarnings("unchecked")
     public ProbingPacMap() {
         entries = new Entry[INITIAL_CAPACITY];
+        this.size = 0;
         // TODO 1b: Initialize any additional fields you introduced above.
     }
 
@@ -71,7 +72,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     public int size() {
         // TODO 3a: Complete the definition of this method to satisfy its specifications and
         //  meet its runtime requirement.
-        throw new UnsupportedOperationException();
+        return size;
     }
 
     /**
@@ -80,7 +81,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     private double loadFactor() {
         // TODO 3b: Complete the definition of this method to satisfy its specifications and
         //  meet its runtime requirement.
-        throw new UnsupportedOperationException();
+        return (double) size/ entries.length;
     }
 
 
