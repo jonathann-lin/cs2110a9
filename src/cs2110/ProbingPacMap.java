@@ -83,20 +83,46 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         return (double) size / entries.length;
     }
 
+    //TODO have to handle negative hashCode()?
     private int hashValue(K key) {
         return key.hashCode() % entries.length;
     }
 
+    /**
+     * Doubles the length of entries and copies over all elements into correct buckets based on
+     * their new hash values.
+     */
+    private void resize() {
+        Entry<K, V>[] newEntries = (Entry<K, V>[]) new Entry[entries.length * 2];
+        int newSize = 0;
+        Iterator<K> it = this.iterator();
+        while (it.hasNext()) {
+            Entry<K, V> e = entries[findEntry(it.next())];
+            int index = e.key.hashCode() % newEntries.length;
+            while (newEntries[index] != null) {
+                index = (index + 1) % newEntries.length;
+            }
+            newEntries[index] = e;
+            newSize++;
+        }
+        entries = newEntries;
+        size = newSize;
+        assertInv();
+    }
+    /*
     private void resizing() {
-        int newLength=entries.length;
+        int newLength = entries.length * 2;
         ProbingPacMapIterator iterator = new ProbingPacMapIterator();
-        Entry<K,V>[] newEntries = new Entry[newLength];
+        Entry<K, V>[] newEntries = (Entry<K, V>[]) new Entry[newLength];
         while (iterator.hasNext()) {
             newEntries[iterator.next().hashCode() % newEntries.length] = entries[findEntry(
                     iterator.next())];
         }
-        entries=newEntries;
+        entries = newEntries;
     }
+
+     */
+
 
     /**
      * If `key` is a key in this map, return the index in `entries` for this key. Otherwise, returns
@@ -106,55 +132,81 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     private int findEntry(K key) {
         int index = hashValue(key);
         for (int i = 0; i < entries.length; i++) {
-            if (entries[index].key.equals(key)) {
+            index = (index + i) % entries.length;
+            if (entries[index] == null) {
+                break; //TODO CHANGE - if ==null, index not in there, so break?
+            }
+            if (entries[index].key.equals(key)) { //TODO check if entries[index]== null
                 return index;
             }
-            index = (index + i + 1) % entries.length;
         }
         for (int i = 0; i < entries.length; i++) {
+            index = (index + i) % entries.length;
             if (entries[index] == null || entries[index].equals(TOMBSTONE)) {
                 return index;
             }
-            index = (index + i + 1) % entries.length;
         }
         return index;
     }
 
     @Override
     public boolean containsKey(K key) {
+        int index = findEntry(key);
+        if (entries[index] == null) {
+            return false;
+        }
+        return entries[index].key.equals(key);
+    }
+
+   /*
+    @Override
+    public boolean containsKey(K key) {
         return entries[findEntry(key)].equals(key);
     }
+     */
 
     @Override
     public V get(K key) {
-        assert containsKey(key);
-        return (entries[findEntry(key)].value);
+        if (!containsKey(key)) {
+            throw new NoSuchElementException();
+        }
+        return entries[findEntry(key)].value;
     }
 
     @Override
     public void put(K key, V value) {
         if (containsKey(key)) {
             entries[findEntry(key)] = new Entry<>(key, value);
-            size++;
+            //TODO don't think size should ++
         } else {
-            int index = hashValue(key);
-            while (entries[index] != null) {
-                index = (index + 1) % entries.length;
-            }
-            entries[index] = new Entry<>(key, value);
+            entries[findFreeIndex(key)] = new Entry<>(key, value);
             size++;
         }
         if (loadFactor() > MAX_LOAD_FACTOR) {
-            resizing();
+            resize();
         }
 
         assertInv();
     }
 
+    /**
+     * Returns the first index where key can be inserted in entries. In other words, finds first
+     * empty index at or after the hash value of key, with wraparound.
+     */
+    private int findFreeIndex(K key) {
+        int index = hashValue(key);
+        while (entries[index] != null) {
+            index = (index + 1) % entries.length;
+        }
+        return index;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public V remove(K key) {
-        assert containsKey(key);
+        if (!containsKey(key)) {
+            throw new NoSuchElementException();
+        }
         V value = entries[findEntry(key)].value();
         entries[findEntry(key)] = TOMBSTONE;
         assertInv();
