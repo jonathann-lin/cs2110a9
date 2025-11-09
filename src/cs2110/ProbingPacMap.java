@@ -69,8 +69,6 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      */
     @Override
     public int size() {
-        // TODO 3a: Complete the definition of this method to satisfy its specifications and
-        //  meet its runtime requirement.
         return size;
     }
 
@@ -78,8 +76,6 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      * Returns the current load factor of the hash table backing this map. Runs in O(1) time.
      */
     private double loadFactor() {
-        // TODO 3b: Complete the definition of this method to satisfy its specifications and
-        //  meet its runtime requirement.
         return (double) size/ entries.length;
     }
 
