@@ -48,6 +48,12 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
 
     // TODO 2: Write an assertInv() method that asserts that all of the class invariants are satisfied.
 
+    /**
+     * Stores current number of keys currently associated with values in this map. In other words,
+     * stores the current number of elements in the map.
+     * Requires that size >= 0. Requires size/entries.length <= MAX_LOAD_FACTOR.
+     */
+    private int size;
 
     /**
      * Create a new empty `ProbingPacMap`.
