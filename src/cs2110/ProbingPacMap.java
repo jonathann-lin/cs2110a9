@@ -42,12 +42,12 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      */
     private Entry<K, V>[] entries;
 
-    // TODO 1a: Add additional fields as required to meet runtime requirements. Be sure to 
-    //  document these fields with a description of how to interpret their values and list any of 
-    //  their invariants.
-
-    // TODO 2: Write an assertInv() method that asserts that all of the class invariants are satisfied.
-
+    private void assertInv(){
+        assert 0 <  MAX_LOAD_FACTOR;
+        assert MAX_LOAD_FACTOR < 1;
+        assert loadFactor() <= MAX_LOAD_FACTOR;
+        assert size() >= 0;
+    }
     /**
      * Stores current number of keys currently associated with values in this map. In other words,
      * stores the current number of elements in the map.
@@ -62,7 +62,6 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     public ProbingPacMap() {
         entries = new Entry[INITIAL_CAPACITY];
         this.size = 0;
-        // TODO 1b: Initialize any additional fields you introduced above.
     }
 
     /**
