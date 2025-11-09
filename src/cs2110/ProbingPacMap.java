@@ -42,10 +42,6 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      */
     private Entry<K, V>[] entries;
 
-    // TODO 1a: Add additional fields as required to meet runtime requirements. Be sure to 
-    //  document these fields with a description of how to interpret their values and list any of 
-    //  their invariants.
-
     // TODO 2: Write an assertInv() method that asserts that all of the class invariants are satisfied.
 
     /**
@@ -61,8 +57,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     @SuppressWarnings("unchecked")
     public ProbingPacMap() {
         entries = new Entry[INITIAL_CAPACITY];
-        this.size = 0;
-        // TODO 1b: Initialize any additional fields you introduced above.
+        size = 0;
     }
 
     /**
@@ -79,8 +74,6 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      * Returns the current load factor of the hash table backing this map. Runs in O(1) time.
      */
     private double loadFactor() {
-        // TODO 3b: Complete the definition of this method to satisfy its specifications and
-        //  meet its runtime requirement.
         return (double) size/ entries.length;
     }
 
