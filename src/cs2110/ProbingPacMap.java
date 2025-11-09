@@ -61,7 +61,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     @SuppressWarnings("unchecked")
     public ProbingPacMap() {
         entries = new Entry[INITIAL_CAPACITY];
-        this.size = 0;
+        size = 0;
     }
 
     /**
