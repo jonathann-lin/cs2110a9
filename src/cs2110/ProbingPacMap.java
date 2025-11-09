@@ -107,14 +107,12 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         int index = hashValue(key);
         for (int i = 0; i < entries.length; i++) {
             if (entries[index].key.equals(key)) {
-                assertInv();
                 return index;
             }
             index = (index + i + 1) % entries.length;
         }
         for (int i = 0; i < entries.length; i++) {
             if (entries[index] == null || entries[index].equals(TOMBSTONE)) {
-                assertInv();
                 return index;
             }
             index = (index + i + 1) % entries.length;
@@ -124,14 +122,12 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
 
     @Override
     public boolean containsKey(K key) {
-        assertInv();
         return entries[findEntry(key)].equals(key);
     }
 
     @Override
     public V get(K key) {
         assert containsKey(key);
-        assertInv();
         return (entries[findEntry(key)].value);
     }
 
@@ -151,6 +147,8 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         if (loadFactor() > MAX_LOAD_FACTOR) {
             resizing();
         }
+
+        assertInv();
     }
 
     @Override
@@ -159,7 +157,11 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         assert containsKey(key);
         V value = entries[findEntry(key)].value();
         entries[findEntry(key)] = TOMBSTONE;
+        assertInv();
+
         return value;
+
+
     }
 
     @Override
