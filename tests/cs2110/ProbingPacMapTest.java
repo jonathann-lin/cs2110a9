@@ -70,6 +70,187 @@ class ProbingPacMapTest {
         assertTrue(map.containsKey(aaa));
         assertTrue(map.containsKey(bbb));
     }
+    @DisplayName("WHEN multiple entries with colliding keys are inserted, THEN all values should be retrievable")
+    @Test
+    void testMultipleCollisions() {
+        ProbingPacMap<StringBadHash, Integer> map = new ProbingPacMap<>();
+        StringBadHash aaa = new StringBadHash("AAA");
+        StringBadHash bbb = new StringBadHash("BBB");
+        StringBadHash ccc = new StringBadHash("CCC"); // same length → same hash
+
+        map.put(aaa, 1);
+        map.put(bbb, 2);
+        map.put(ccc, 3);
+
+        assertEquals(1, map.get(aaa));
+        assertEquals(2, map.get(bbb));
+        assertEquals(3, map.get(ccc));
+        assertTrue(map.containsKey(aaa));
+        assertTrue(map.containsKey(bbb));
+        assertTrue(map.containsKey(ccc));
+    }
+
+    @DisplayName("WHEN an entry is removed in the middle of a collision chain, THEN subsequent entries should still be reachable")
+    @Test
+    void testRemoveMiddleCollision() {
+        ProbingPacMap<StringBadHash, Integer> map = new ProbingPacMap<>();
+        StringBadHash aaa = new StringBadHash("AAA");
+        StringBadHash bbb = new StringBadHash("BBB");
+        StringBadHash ccc = new StringBadHash("CCC"); // all collide
+
+        map.put(aaa, 1);
+        map.put(bbb, 2);
+        map.put(ccc, 3);
+
+        map.remove(bbb);
+
+        assertFalse(map.containsKey(bbb));
+        assertEquals(1, map.get(aaa));  // still reachable
+        assertEquals(3, map.get(ccc));  // still reachable
+    }
+
+    @DisplayName("WHEN many entries are inserted to exceed max load factor, THEN the map should resize and all entries should remain accessible")
+    @Test
+    void testResizeKeepsAllEntries() {
+        ProbingPacMap<StringBadHash, Integer> map = new ProbingPacMap<>();
+        int n = 20; // initial capacity is 16, max load factor 0.5 → triggers resize
+
+        for (int i = 0; i < n; i++) {
+            StringBadHash key = new StringBadHash("K" + i);
+            map.put(key, i);
+        }
+
+        // all entries should be retrievable
+        for (int i = 0; i < n; i++) {
+            StringBadHash key = new StringBadHash("K" + i);
+            assertEquals(i, map.get(key));
+        }
+
+        // map size should be correct
+        assertEquals(n, map.size());
+    }
+
+    @DisplayName("WHEN removing entries after resizing, THEN subsequent collision chains should still resolve correctly")
+    @Test
+    void testRemoveAfterResize() {
+        ProbingPacMap<StringBadHash, Integer> map = new ProbingPacMap<>();
+        int n = 20;
+
+        // insert many entries to trigger resize
+        for (int i = 0; i < n; i++) {
+            StringBadHash key = new StringBadHash("K" + i);
+            map.put(key, i);
+        }
+
+        // remove a few entries
+        for (int i = 0; i < 5; i++) {
+            StringBadHash key = new StringBadHash("K" + i);
+            map.remove(key);
+        }
+
+        // removed keys should not exist
+        for (int i = 0; i < 5; i++) {
+            StringBadHash key = new StringBadHash("K" + i);
+            assertFalse(map.containsKey(key));
+        }
+
+        // remaining keys should still be retrievable
+        for (int i = 5; i < n; i++) {
+            StringBadHash key = new StringBadHash("K" + i);
+            assertEquals(i, map.get(key));
+        }
+    }
+
+    @DisplayName("WHEN removing entries, tombstones are not reused immediately")
+    @Test
+    void testTombstonesNotReused() {
+        ProbingPacMap<StringBadHash, Integer> map = new ProbingPacMap<>();
+        StringBadHash aaa = new StringBadHash("AAA");
+        StringBadHash bbb = new StringBadHash("BBB");
+        StringBadHash ccc = new StringBadHash("CCC"); // all collide
+
+        map.put(aaa, 1);
+        map.put(bbb, 2);
+
+        map.remove(aaa); // tombstone created
+
+        // Inserting ccc should go to next free index, NOT overwrite tombstone
+        map.put(ccc, 3);
+
+        assertFalse(map.containsKey(aaa));
+        assertEquals(2, map.get(bbb));
+        assertEquals(3, map.get(ccc));
+
+        // size should reflect only current entries
+        assertEquals(3add, map.size());
+    }
+
+    @DisplayName("WHEN resizing occurs, THEN tombstones are cleared and all entries are rehashed")
+    @Test
+    void testResizeClearsTombstones() {
+        ProbingPacMap<StringBadHash, Integer> map = new ProbingPacMap<>();
+        int n = 20; // initial capacity 16, load factor triggers resize
+
+        for (int i = 0; i < n; i++) {
+            map.put(new StringBadHash("K" + i), i);
+        }
+
+        // remove a few entries (creates tombstones)
+        for (int i = 0; i < 5; i++) {
+            map.remove(new StringBadHash("K" + i));
+        }
+        assertEquals(20, map.size());
+
+
+        // forcibly trigger a resize
+        for (int i = 20; i < 40; i++) {
+            map.put(new StringBadHash("K" + i), i);
+        }
+        // All remaining entries should be reachable
+        for (int i = 5; i < n; i++) {
+            assertEquals(i, map.get(new StringBadHash("K" + i)));
+        }
+
+        for (int i = 20; i < 40; i++) {
+            assertEquals(i, map.get(new StringBadHash("K" + i)));
+        }
+
+        // Removed entries should still not exist
+        for (int i = 0; i < 5; i++) {
+            assertFalse(map.containsKey(new StringBadHash("K" + i)));
+        }
+
+        // size should be correct after resize
+        assertEquals(35, map.size());
+    }
+
+    @DisplayName("WHEN many collisions exist and some entries are removed, THEN linear probing still works after resize")
+    @Test
+    void testCollisionChainAfterResize() {
+        ProbingPacMap<StringBadHash, Integer> map = new ProbingPacMap<>();
+        StringBadHash aaa = new StringBadHash("AAA");
+        StringBadHash bbb = new StringBadHash("BBB");
+        StringBadHash ccc = new StringBadHash("CCC");
+
+        map.put(aaa, 1);
+        map.put(bbb, 2);
+        map.put(ccc, 3);
+
+        map.remove(bbb); // middle tombstone
+
+        // insert more entries to trigger resize
+        for (int i = 0; i < 20; i++) {
+            map.put(new StringBadHash("Key" + i), i);
+        }
+
+        // removed entry should remain absent
+        assertFalse(map.containsKey(bbb));
+
+        // original entries still retrievable
+        assertEquals(1, map.get(aaa));
+        assertEquals(3, map.get(ccc));
+    }
+
 
     // TODO 4: Add additional unit tests to cover the `ProbingPacMap` class.
 }

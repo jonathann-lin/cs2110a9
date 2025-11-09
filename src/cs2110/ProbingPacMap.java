@@ -133,10 +133,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         int index = hashValue(key);
         for (int i = 0; i < entries.length; i++) {
             index = (index + i) % entries.length;
-            if (entries[index] == null) {
-                break; //TODO CHANGE - if ==null, index not in there, so break?
-            }
-            if (entries[index] != TOMBSTONE && entries[index].key.equals(key)) { //TODO check if entries[index]== null
+            if (entries[index] != null && entries[index] != TOMBSTONE && entries[index].key.equals(key)) { //TODO check if entries[index]== null
                 return index;
             }
         }
