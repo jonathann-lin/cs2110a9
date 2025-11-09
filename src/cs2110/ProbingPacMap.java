@@ -136,7 +136,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
             if (entries[index] == null) {
                 break; //TODO CHANGE - if ==null, index not in there, so break?
             }
-            if (entries[index].key.equals(key)) { //TODO check if entries[index]== null
+            if (entries[index] != TOMBSTONE && entries[index].key.equals(key)) { //TODO check if entries[index]== null
                 return index;
             }
         }
@@ -152,7 +152,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     @Override
     public boolean containsKey(K key) {
         int index = findEntry(key);
-        if (entries[index] == null) {
+        if (entries[index] == null || entries[index] == TOMBSTONE) {
             return false;
         }
         return entries[index].key.equals(key);
