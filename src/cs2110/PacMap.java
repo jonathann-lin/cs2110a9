@@ -29,7 +29,7 @@ public interface PacMap<K, V> extends Iterable<K> {
     void put(K key, V value);
 
     /**
-     * Removes the entry associated with the given `key` and returns its `value`. Throws a
+     * Removes and return the value associated with the given `key`. Throws a
      * `NoSuchElementException` if no value is associated with that key. Requires `key` is not null.
      */
     V remove(K key);

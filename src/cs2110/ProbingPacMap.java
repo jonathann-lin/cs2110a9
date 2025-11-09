@@ -29,12 +29,12 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     /**
      * The maximum load factor (inclusive) that is allowed in the `entries` hash table. If the load
      * factor ever exceeds this maximum, then the hash table length must be immediately doubled to
-     * reduce the load factor. Must have `0 < MAX_LOAD_FACTOR < 1`.
+     * reduce the load factor. Must have `0 < maxLoadFactor < 1`.
      */
     public static final double MAX_LOAD_FACTOR = 0.5;
 
     /**
-     * The probing hash table backing this map. Indices (i.e., buckets) that don't currently store an
+     * The probing hash table backing this map. Indices (i.e., buckets) that don't current store an
      * entry (possibly a TOMBSTONE) are `null`. If this map contains an entry with a key whose hash
      * code maps to index `i`, then the (unique) entry containing that key is reachable via linear
      * search starting at index `i` (wrapping around the array if necessary) without encountering
@@ -46,6 +46,14 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     //  document these fields with a description of how to interpret their values and list any of 
     //  their invariants.
 
+    // TODO 2: Write an assertInv() method that asserts that all of the class invariants are satisfied.
+
+    /**
+     * Stores current number of keys currently associated with values in this map. In other words,
+     * stores the current number of elements in the map.
+     * Requires that size >= 0. Requires size/entries.length <= MAX_LOAD_FACTOR.
+     */
+    private int size;
 
     /**
      * Create a new empty `ProbingPacMap`.
