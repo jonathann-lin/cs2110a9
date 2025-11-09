@@ -87,6 +87,17 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         return key.hashCode() % entries.length;
     }
 
+    private void resizing() {
+        int newLength=entries.length;
+        ProbingPacMapIterator iterator = new ProbingPacMapIterator();
+        Entry<K,V>[] newEntries = new Entry[newLength];
+        while (iterator.hasNext()) {
+            newEntries[iterator.next().hashCode() % newEntries.length] = entries[findEntry(
+                    iterator.next())];
+        }
+        entries=newEntries;
+    }
+
     /**
      * If `key` is a key in this map, return the index in `entries` for this key. Otherwise, returns
      * the first index of a `null` or tombstone entry in the table at or after the index
@@ -95,13 +106,13 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     private int findEntry(K key) {
         int index = hashValue(key);
         for (int i = 0; i < entries.length; i++) {
-            if (entries[index].key.equals(key)){
+            if (entries[index].key.equals(key)) {
                 assertInv();
                 return index;
             }
             index = (index + i + 1) % entries.length;
         }
-        for (int i = 0; i < entries.length; i++){
+        for (int i = 0; i < entries.length; i++) {
             if (entries[index] == null || entries[index].equals(TOMBSTONE)) {
                 assertInv();
                 return index;
@@ -127,14 +138,18 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     @Override
     public void put(K key, V value) {
         if (containsKey(key)) {
-            entries[findEntry(key)] = new Entry(key, value);
-        }
-        else{
-            int index=hashValue(key);
-            while (entries[index] != null){
-                index = (index +1) % entries.length;
+            entries[findEntry(key)] = new Entry<>(key, value);
+            size++;
+        } else {
+            int index = hashValue(key);
+            while (entries[index] != null) {
+                index = (index + 1) % entries.length;
             }
-            entries[index] = new Entry(key, value);
+            entries[index] = new Entry<>(key, value);
+            size++;
+        }
+        if (loadFactor() > MAX_LOAD_FACTOR) {
+            resizing();
         }
     }
 
@@ -142,7 +157,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     @SuppressWarnings("unchecked")
     public V remove(K key) {
         assert containsKey(key);
-        V value=entries[findEntry(key)].value();
+        V value = entries[findEntry(key)].value();
         entries[findEntry(key)] = TOMBSTONE;
         return value;
     }
