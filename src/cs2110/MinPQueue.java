@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 
 /**
  * A min priority queue of distinct elements of type `KeyType` associated with (extrinsic) double
- * priorities. Supports updating the priorities of elements currently in the queue, and guarantees 
+ * priorities. Supports updating the priorities of elements currently in the queue, and guarantees
  * O(log N) performance for all modifying operations, where N is the queue size.
  */
 public class MinPQueue<KeyType> {
@@ -13,7 +13,9 @@ public class MinPQueue<KeyType> {
     /**
      * Pairs an element `key` with its associated priority `priority`.
      */
-    private record Entry<KeyType>(KeyType key, double priority) { }
+    private record Entry<KeyType>(KeyType key, double priority) {
+
+    }
 
     /**
      * ArrayList representing a binary min-heap of element-priority pairs.  Satisfies
@@ -23,8 +25,8 @@ public class MinPQueue<KeyType> {
 
     /**
      * Associates each element in the queue with its index in `heap`.  Satisfies
-     * `heap.get(index.get(e)).key().equals(e)` if `e` is an element in the queue. 
-     * Only maps elements that are in the queue (`index.size() == heap.size()`).
+     * `heap.get(index.get(e)).key().equals(e)` if `e` is an element in the queue. Only maps
+     * elements that are in the queue (`index.size() == heap.size()`).
      */
     private final PacMap<KeyType, Integer> index;
 
@@ -62,8 +64,8 @@ public class MinPQueue<KeyType> {
     }
 
     /**
-     * Return the minimum priority associated with an element in this queue.  Throws
-     * a `NoSuchElementException` if this queue is empty.
+     * Return the minimum priority associated with an element in this queue.  Throws a
+     * `NoSuchElementException` if this queue is empty.
      */
     public double minPriority() {
         return heap.getFirst().priority();
@@ -74,8 +76,17 @@ public class MinPQueue<KeyType> {
      * `0 <= i,j < heap.size()`.
      */
     private void swap(int i, int j) {
-        // TODO 6a: Implement this method according to its specification
-        throw new UnsupportedOperationException();
+        assert i >= 0 && i < heap.size();
+        assert j >= 0 && j < heap.size();
+
+        Entry<KeyType> temp = heap.get(i);
+        heap.set(i, heap.get(j));
+        heap.set(j, temp);
+
+        index.put(heap.get(j).key, j);
+        index.put(heap.get(i).key, i);
+
+
     }
 
     // TODO 6b: Implement private helper methods for bubbling entries up and down in the heap.
