@@ -83,7 +83,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         return (double) size / entries.length;
     }
 
-    private int hashValue(K key, Entry<K,V>[] arr) {
+    private int hashValue(K key, Entry<K, V>[] arr) {
         return Math.abs(key.hashCode() % arr.length);
     }
 
@@ -91,6 +91,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      * Doubles the length of entries and copies over all elements into correct buckets based on
      * their new hash values.
      */
+
     private void resize() {
         Entry<K, V>[] newEntries = (Entry<K, V>[]) new Entry[entries.length * 2];
         int newSize = 0;
@@ -130,7 +131,8 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         int index = hashValue(key, entries);
         for (int i = 0; i < entries.length; i++) {
             index = (index + i) % entries.length;
-            if (entries[index] != null && entries[index] != TOMBSTONE && entries[index].key.equals(key)) { //TODO check if entries[index]== null
+            if (entries[index] != null && entries[index] != TOMBSTONE && entries[index].key.equals(
+                    key)) { //TODO check if entries[index]== null
                 return index;
             }
         }
@@ -173,7 +175,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
             entries[findEntry(key)] = new Entry<>(key, value);
             //TODO don't think size should ++
         } else {
-            entries[findFreeIndex(key,entries)] = new Entry<>(key, value);
+            entries[findFreeIndex(key, entries)] = new Entry<>(key, value);
             size++;
         }
         if (loadFactor() > MAX_LOAD_FACTOR) {
@@ -183,11 +185,11 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         assertInv();
     }
 
-    /**<
-     * Returns the first index where key can be inserted in arr. In other words, finds first
-     * empty index at or after the hash value of key, with wraparound.
+    /**
+     * < Returns the first index where key can be inserted in arr. In other words, finds first empty
+     * index at or after the hash value of key, with wraparound.
      */
-    private int findFreeIndex(K key, Entry<K,V>[] arr) {
+    private int findFreeIndex(K key, Entry<K, V>[] arr) {
         int index = hashValue(key, arr);
         while (arr[index] != null) {
             index = (index + 1) % arr.length;
