@@ -182,7 +182,7 @@ class ProbingPacMapTest {
         assertEquals(3, map.get(ccc));
 
         // size should reflect only current entries
-        assertEquals(3add, map.size());
+        assertEquals(3, map.size());
     }
 
     @DisplayName("WHEN resizing occurs, THEN tombstones are cleared and all entries are rehashed")

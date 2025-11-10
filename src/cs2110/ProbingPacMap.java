@@ -83,9 +83,8 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         return (double) size / entries.length;
     }
 
-    //TODO have to handle negative hashCode()?
-    private int hashValue(K key) {
-        return key.hashCode() % entries.length;
+    private int hashValue(K key, Entry<K,V>[] arr) {
+        return Math.abs(key.hashCode() % arr.length);
     }
 
     /**
@@ -98,7 +97,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         Iterator<K> it = this.iterator();
         while (it.hasNext()) {
             Entry<K, V> e = entries[findEntry(it.next())];
-            int index = e.key.hashCode() % newEntries.length;
+            int index = hashValue(e.key, newEntries);
             while (newEntries[index] != null) {
                 index = (index + 1) % newEntries.length;
             }
@@ -130,7 +129,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      * corresponding to the key's hash code (wrapping around).
      */
     private int findEntry(K key) {
-        int index = hashValue(key);
+        int index = hashValue(key, entries);
         for (int i = 0; i < entries.length; i++) {
             index = (index + i) % entries.length;
             if (entries[index] != null && entries[index] != TOMBSTONE && entries[index].key.equals(key)) { //TODO check if entries[index]== null
@@ -191,7 +190,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      * empty index at or after the hash value of key, with wraparound.
      */
     private int findFreeIndex(K key) {
-        int index = hashValue(key);
+        int index = hashValue(key, entries);
         while (entries[index] != null) {
             index = (index + 1) % entries.length;
         }
