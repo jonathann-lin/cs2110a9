@@ -97,17 +97,15 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         Iterator<K> it = this.iterator();
         while (it.hasNext()) {
             Entry<K, V> e = entries[findEntry(it.next())];
-            int index = hashValue(e.key, newEntries);
-            while (newEntries[index] != null) {
-                index = (index + 1) % newEntries.length;
-            }
-            newEntries[index] = e;
+            newEntries[findFreeIndex(e.key, newEntries)] = e;
             newSize++;
         }
         entries = newEntries;
         size = newSize;
         assertInv();
     }
+
+
     /*
     private void resizing() {
         int newLength = entries.length * 2;
@@ -175,7 +173,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
             entries[findEntry(key)] = new Entry<>(key, value);
             //TODO don't think size should ++
         } else {
-            entries[findFreeIndex(key)] = new Entry<>(key, value);
+            entries[findFreeIndex(key,entries)] = new Entry<>(key, value);
             size++;
         }
         if (loadFactor() > MAX_LOAD_FACTOR) {
@@ -185,14 +183,14 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         assertInv();
     }
 
-    /**
-     * Returns the first index where key can be inserted in entries. In other words, finds first
+    /**<
+     * Returns the first index where key can be inserted in arr. In other words, finds first
      * empty index at or after the hash value of key, with wraparound.
      */
-    private int findFreeIndex(K key) {
-        int index = hashValue(key, entries);
-        while (entries[index] != null) {
-            index = (index + 1) % entries.length;
+    private int findFreeIndex(K key, Entry<K,V>[] arr) {
+        int index = hashValue(key, arr);
+        while (arr[index] != null) {
+            index = (index + 1) % arr.length;
         }
         return index;
     }
