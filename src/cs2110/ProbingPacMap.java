@@ -132,7 +132,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         for (int i = 0; i < entries.length; i++) {
             index = (index + i) % entries.length;
             if (entries[index] != null && entries[index] != TOMBSTONE && entries[index].key.equals(
-                    key)) { //TODO check if entries[index]== null
+                    key)) {
                 return index;
             }
         }
@@ -173,7 +173,6 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
     public void put(K key, V value) {
         if (containsKey(key)) {
             entries[findEntry(key)] = new Entry<>(key, value);
-            //TODO don't think size should ++
         } else {
             entries[findFreeIndex(key, entries)] = new Entry<>(key, value);
             size++;
