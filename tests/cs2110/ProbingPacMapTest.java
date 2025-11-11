@@ -161,29 +161,6 @@ class ProbingPacMapTest {
         }
     }
 
-    @DisplayName("WHEN removing entries, tombstones are not reused immediately")
-    @Test
-    void testTombstonesNotReused() {
-        ProbingPacMap<StringBadHash, Integer> map = new ProbingPacMap<>();
-        StringBadHash aaa = new StringBadHash("AAA");
-        StringBadHash bbb = new StringBadHash("BBB");
-        StringBadHash ccc = new StringBadHash("CCC"); // all collide
-
-        map.put(aaa, 1);
-        map.put(bbb, 2);
-
-        map.remove(aaa); // tombstone created
-
-        // Inserting ccc should go to next free index, NOT overwrite tombstone
-        map.put(ccc, 3);
-
-        assertFalse(map.containsKey(aaa));
-        assertEquals(2, map.get(bbb));
-        assertEquals(3, map.get(ccc));
-
-        // size should reflect only current entries
-        assertEquals(3, map.size());
-    }
 
     @DisplayName("WHEN resizing occurs, THEN tombstones are cleared and all entries are rehashed")
     @Test

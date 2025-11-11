@@ -156,12 +156,11 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
 
     @Override
     public void put(K key, V value) {
-        if (containsKey(key)) {
-            entries[findEntry(key)] = new Entry<>(key, value);
-        } else {
-            entries[findFreeIndex(key, entries)] = new Entry<>(key, value);
-            size++;
+        int index = findEntry(key);
+        if (entries[index] == null){ //only increment size if it fills an empty slot, otherwise we overwrite a tombstone or existing entry
+            size ++;
         }
+        entries[index] = new Entry<>(key, value);
         if (loadFactor() > MAX_LOAD_FACTOR) {
             resize();
         }
