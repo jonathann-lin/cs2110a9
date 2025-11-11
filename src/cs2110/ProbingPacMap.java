@@ -83,7 +83,14 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         return (double) size / entries.length;
     }
 
+
+    /**
+     * Returns the hash value of 'key' in 'arr'.
+     * Requires that key and arr are not null.
+     */
     private int hashValue(K key, Entry<K, V>[] arr) {
+        assert key != null;
+        assert arr != null;
         return Math.abs(key.hashCode() % arr.length);
     }
 
