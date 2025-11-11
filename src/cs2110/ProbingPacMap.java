@@ -106,22 +106,6 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         assertInv();
     }
 
-
-    /*
-    private void resizing() {
-        int newLength = entries.length * 2;
-        ProbingPacMapIterator iterator = new ProbingPacMapIterator();
-        Entry<K, V>[] newEntries = (Entry<K, V>[]) new Entry[newLength];
-        while (iterator.hasNext()) {
-            newEntries[iterator.next().hashCode() % newEntries.length] = entries[findEntry(
-                    iterator.next())];
-        }
-        entries = newEntries;
-    }
-
-     */
-
-
     /**
      * If `key` is a key in this map, return the index in `entries` for this key. Otherwise, returns
      * the first index of a `null` or tombstone entry in the table at or after the index
