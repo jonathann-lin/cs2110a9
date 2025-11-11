@@ -251,6 +251,47 @@ class ProbingPacMapTest {
         assertEquals(3, map.get(ccc));
     }
 
+    @DisplayName("get() with a non-existent key should throw NoSuchElementException")
+    @Test
+    void testGetNonExistentKey() {
+        ProbingPacMap<String, Integer> map = new ProbingPacMap<>();
+        assertThrows(NoSuchElementException.class, () -> map.get("missing"));
+    }
 
-    // TODO 4: Add additional unit tests to cover the `ProbingPacMap` class.
+    @DisplayName("get() after removing a key should throw NoSuchElementException")
+    @Test
+    void testGetAfterRemove() {
+        ProbingPacMap<String, Integer> map = new ProbingPacMap<>();
+        map.put("a", 1);
+        map.remove("a");
+        assertThrows(NoSuchElementException.class, () -> map.get("a"));
+    }
+    @DisplayName("get() with tombstones in the map should still throw for non-existent key")
+    @Test
+    void testGetNonExistentWithTombstones() {
+        ProbingPacMap<String, Integer> map = new ProbingPacMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.remove("a"); // tombstone
+        assertThrows(NoSuchElementException.class, () -> map.get("a"));
+        assertEquals(2, map.get("b")); // make sure existing entries still work
+    }
+
+    @DisplayName("remove() should work correctly after multiple tombstones")
+    @Test
+    void testRemoveWithMultipleTombstones() {
+        ProbingPacMap<String, Integer> map = new ProbingPacMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+
+        map.remove("a");
+        map.remove("b");
+
+        assertThrows(NoSuchElementException.class, () -> map.remove("a"));
+        assertThrows(NoSuchElementException.class, () -> map.remove("b"));
+        assertEquals(3, map.get("c")); // remaining entry is fine
+    }
+
+
 }
