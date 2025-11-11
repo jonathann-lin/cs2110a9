@@ -112,21 +112,21 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
      * corresponding to the key's hash code (wrapping around).
      */
     private int findEntry(K key) {
-        int index = hashValue(key, entries);
+        int startIndex = hashValue(key, entries);
+        int firstTombstone = -1;
         for (int i = 0; i < entries.length; i++) {
-            index = (index + i) % entries.length;
-            if (entries[index] != null && entries[index] != TOMBSTONE && entries[index].key.equals(
-                    key)) {
+            int index = (startIndex + i) % entries.length;
+            if (entries[index] == null) {
+                return firstTombstone == -1 ? index : firstTombstone;
+            } else if (entries[index] == TOMBSTONE) {
+                if (firstTombstone == -1) {
+                    firstTombstone = index;
+                }
+            } else if (entries[index].key.equals(key)) {
                 return index;
             }
         }
-        for (int i = 0; i < entries.length; i++) {
-            index = (index + i) % entries.length;
-            if (entries[index] == null || entries[index].equals(TOMBSTONE)) {
-                return index;
-            }
-        }
-        return index;
+        return firstTombstone;//Only triggers if key is not in there and map is full
     }
 
     @Override
@@ -138,12 +138,6 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
         return entries[index].key.equals(key);
     }
 
-   /*
-    @Override
-    public boolean containsKey(K key) {
-        return entries[findEntry(key)].equals(key);
-    }
-     */
 
     @Override
     public V get(K key) {
