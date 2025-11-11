@@ -89,16 +89,94 @@ public class MinPQueue<KeyType> {
 
     }
 
-    // TODO 6b: Implement private helper methods for bubbling entries up and down in the heap.
-    //  Their interfaces are up to you, but you must write precise specifications.
+    /**
+     * Repeatedly swaps the element at index 'i' of 'heap' with its parent until
+     * heap.get(i).priority() >= heap.get((i-1)/2).priority() or i == 0. Correctly updates
+     * the index of the element in 'index'.
+     * Requires that i>=0 and i<heap.size().
+     */
+    private void bubbleUp(int i) {
+        assert i >= 0 && i < heap.size();
+        if (i == 0) {
+            return;
+        }
+
+        int p = parent(i);
+
+        if (heap.get(i).priority < heap.get(p).priority) {
+            swap(i, p);
+            bubbleUp(p);
+        }
+    }
+
+    /**
+     * Returns the index of the parent of the element at index 'i' in 'heap'. The parent of the
+     * element at index 0 is itself. Requires that i >= 0 and i < heap.size();
+     */
+    private int parent(int i) {
+        assert i >= 0 && i < heap.size();
+        return (i - 1) / 2;
+    }
+
+    /**
+     * Repeatedly swaps the element at index 'i' of 'heap' with its child of lower priority until
+     * the element at index 'i' has a lower priority than both of its children. Correctly updates
+     * the index of the element in 'index'.
+     *
+     * Requires that i >= 0 and i < heap.size();
+     */
+    private void bubbleDown(int i) {
+        assert i >= 0 && i < heap.size();
+        int indexOfLowestChild = indexOfChildOfLowestPriority(i);
+
+        if(indexOfLowestChild == i) {
+            return; //leaf node, no more bubble down
+        }
+
+        if(heap.get(indexOfLowestChild).priority < heap.get(i).priority){
+            swap(i, indexOfLowestChild);
+            bubbleDown(indexOfLowestChild);
+        }
+    }
+
+    /**
+     * Finds the child with lower priority of the element at index 'i' in 'heap'. If the element at
+     * 'i' has no child, returns i. If priorities are equal, return left child by default.
+     * Requires that i >= 0 and i < heap.size();
+     *
+     */
+    private int indexOfChildOfLowestPriority(int i) {
+        assert i >= 0 && i < heap.size();
+        int leftChild = i * 2 + 1;
+        if (leftChild >= heap.size()){
+            return i; //'i' is leaf node
+        }
+        int rightChild = i * 2 + 2;
+
+        if(rightChild >= heap.size()){
+            return leftChild; //only right child
+        }
+
+        if(heap.get(leftChild).priority <= heap.get(rightChild).priority){
+            return leftChild;
+        }
+        else{
+            return rightChild;
+        }
+
+    }
+
 
     /**
      * Add element `key` to this queue, associated with priority `priority`.  Requires `key` is not
      * contained in this queue.
      */
     private void add(KeyType key, double priority) {
-        // TODO 6c: Implement this method according to its specification
-        throw new UnsupportedOperationException();
+        assert !index.containsKey(key);
+        int i = heap.size(); //index of next element to be added
+        heap.add(new Entry<>(key, priority));
+        index.put(key, i);
+        bubbleUp(i); //also updates index
     }
 
     /**
@@ -107,9 +185,16 @@ public class MinPQueue<KeyType> {
      */
     private void update(KeyType key, double priority) {
         assert index.containsKey(key);
-
-        // TODO 6d: Implement this method according to its specification
-        throw new UnsupportedOperationException();
+        int i = index.get(key);
+        double currentPriority = heap.get(i).priority;
+        if (currentPriority == priority) return;
+        heap.set(i, new Entry<>(key, priority));
+        if (priority>currentPriority){
+            bubbleDown(i);
+        }
+        else{
+            bubbleUp(i);
+        }
     }
 
     /**
@@ -130,8 +215,22 @@ public class MinPQueue<KeyType> {
      * Throws NoSuchElementException if this queue is empty.
      */
     public KeyType remove() {
-        // TODO 6e: Implement this method according to its specification
-        throw new UnsupportedOperationException();
+        if(heap.isEmpty()){
+            throw new NoSuchElementException();
+        }
+
+        KeyType key = heap.getFirst().key;
+
+        swap(0, heap.size()-1);
+        heap.removeLast();
+        index.remove(key);
+
+        //check for case that heap was originally only one element that is now removed
+        if(!heap.isEmpty()){
+            bubbleDown(0);
+        }
+
+        return key;
     }
 
 }
