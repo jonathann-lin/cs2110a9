@@ -176,7 +176,7 @@ class ProbingPacMapTest {
         for (int i = 0; i < 5; i++) {
             map.remove(new StringBadHash("K" + i));
         }
-        assertEquals(20, map.size());
+        assertEquals(15, map.size());
 
 
         // forcibly trigger a resize
