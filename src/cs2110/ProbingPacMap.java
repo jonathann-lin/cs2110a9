@@ -110,6 +110,7 @@ public class ProbingPacMap<K, V> implements PacMap<K, V> {
             newEntries[findFreeIndex(e.key, newEntries)] = e;
         }
         entries = newEntries;
+        tombstoneNum = 0;
         assertInv();
     }
 

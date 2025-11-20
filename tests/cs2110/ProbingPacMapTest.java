@@ -157,6 +157,7 @@ class ProbingPacMapTest {
         // remaining keys should still be retrievable
         for (int i = 5; i < n; i++) {
             StringBadHash key = new StringBadHash("K" + i);
+            assertTrue(map.containsKey(key));
             assertEquals(i, map.get(key));
         }
     }
@@ -174,7 +175,9 @@ class ProbingPacMapTest {
 
         // remove a few entries (creates tombstones)
         for (int i = 0; i < 5; i++) {
-            map.remove(new StringBadHash("K" + i));
+            StringBadHash key = new StringBadHash("K" + i);
+            map.remove(key);
+            assertFalse(map.containsKey(key));
         }
         assertEquals(15, map.size());
 
@@ -185,7 +188,9 @@ class ProbingPacMapTest {
         }
         // All remaining entries should be reachable
         for (int i = 5; i < n; i++) {
-            assertEquals(i, map.get(new StringBadHash("K" + i)));
+            StringBadHash key = new StringBadHash("K" + i);
+            assertEquals(i, map.get(key));
+            assertTrue(map.containsKey(key));
         }
 
         for (int i = 20; i < 40; i++) {
@@ -240,7 +245,8 @@ class ProbingPacMapTest {
     void testGetAfterRemove() {
         ProbingPacMap<String, Integer> map = new ProbingPacMap<>();
         map.put("a", 1);
-        map.remove("a");
+        assertEquals(map.remove("a"), 1);
+
         assertThrows(NoSuchElementException.class, () -> map.get("a"));
     }
     @DisplayName("get() with tombstones in the map should still throw for non-existent key")
@@ -262,8 +268,10 @@ class ProbingPacMapTest {
         map.put("b", 2);
         map.put("c", 3);
 
-        map.remove("a");
-        map.remove("b");
+        assertEquals(map.remove("a"),1);
+        assertEquals(map.remove("b"),2);
+        assertFalse(map.containsKey("a"));
+        assertFalse(map.containsKey("b"));
 
         assertThrows(NoSuchElementException.class, () -> map.remove("a"));
         assertThrows(NoSuchElementException.class, () -> map.remove("b"));
